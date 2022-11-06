@@ -1,0 +1,49 @@
+version: "3.1"
+services:
+  postgresqldb:
+    # 서울 리전 버전 체크
+    # aws rds describe-db-engine-versions | jq '.DBEngineVersions[] | select(.SupportedEngineModes != null and .SupportedEngineModes[] == "serverless" and .Engine == "aurora-postgresql")'
+    image: postgres:11.13
+    container_name: db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRESQL_USER}
+      POSTGRES_PASSWORD: ${POSTGRESQL_PASSWORD}
+      POSTGRES_DB: apidb
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - ${POSTGRESQL_PORT}:5432
+    volumes:
+      - dbdata:/var/lib/postgresql/data/pgdata
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "pg_isready -U supertokens_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  # https://supertokens.com/blog/connect-supertokens-to-database
+  auth:
+    image: registry.supertokens.io/supertokens/supertokens-postgresql
+    depends_on:
+      - postgresqldb
+    container_name: auth
+    networks:
+      - app_network
+    healthcheck:
+      test: >
+        bash -c 'exec 3<>/dev/tcp/127.0.0.1/3567 && echo -e "GET /hello HTTP/1.1\r\nhost: 127.0.0.1:3567\r\nConnection: close\r\n\r\n" >&3 && cat <&3 | grep "Hello"'
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      API_KEYS: ${API_SECRET}
+      POSTGRESQL_CONNECTION_URI: "postgresql://${POSTGRESQL_USER}:${POSTGRESQL_PASSWORD}@${POSTGRESQL_HOST}:${POSTGRESQL_PORT}/${POSTGRESQL_DATABASE_NAME}"
+    ports:
+      - 3567:3567
+
+volumes:
+  dbdata:
+networks:
+  app_network:
+    driver: bridge
