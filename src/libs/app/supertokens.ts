@@ -53,7 +53,7 @@ supertokens.init({
         enable: true,
         // issuer: "",
       },
-      cookieSameSite: "none",
+      // cookieSameSite: "none",
     }), // initializes session features
     Dashboard.init({
       apiKey: "hello",

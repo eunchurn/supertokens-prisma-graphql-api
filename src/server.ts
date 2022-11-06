@@ -9,8 +9,8 @@ const server = new ApolloServer({
   schema,
   context,
   introspection: process.env.NODE_ENV !== "production",
-  csrfPrevention: true,
-  cache: "bounded",
+  // csrfPrevention: true,
+  // cache: "bounded",
 });
 
 export async function runServer() {

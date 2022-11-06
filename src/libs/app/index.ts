@@ -11,12 +11,16 @@ export async function getApp() {
   app.disable("x-powered-by");
   app.use(
     cors({
-      origin: ["https://studio.apollographql.com", /localhost/],
+      origin: [
+        "https://studio.apollographql.com",
+        /localhost/,
+        "http://localhost:3001",
+      ],
       // allowedHeaders: ["content-type", ...getAllCORSHeaders()],
       credentials: true,
     }),
   );
   app.use(supertokensMiddleware());
-  app.use("/", verifySession({ sessionRequired: false }));
+  // app.use("/", verifySession({ sessionRequired: false }));
   return app;
 }
