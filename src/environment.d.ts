@@ -10,6 +10,14 @@ declare global {
        * `NODE_ENV`: NodeJS environment (`production`, `development`, `test`) Node 실행 환경을 의미합니다.
        */
       NODE_ENV?: string;
+      /**
+       * `APOLLO_KEY`: Apollo Studio Key
+       */
+      APOLLO_KEY: string;
+      /**
+       * `APOLLO_GRAPH_REF`: Apollo Graph Ref Name
+       */
+      APOLLO_GRAPH_REF: string;
       POSTGRESQL_HOST: string;
       POSTGRESQL_PORT: string;
       POSTGRESQL_DATABASE_NAME: string;

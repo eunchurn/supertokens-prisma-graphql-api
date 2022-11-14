@@ -1,14 +1,15 @@
 // https://graphql-nexus.github.io/nexus-prisma
-import { all_auth_recipe_users, Post } from "nexus-prisma";
+import { User, Post } from "nexus-prisma";
 import { objectType } from "nexus";
 
-export const allAuthRecipeUsers = objectType({
-  name: all_auth_recipe_users.$name,
-  description: all_auth_recipe_users.$description,
+export const UserType = objectType({
+  name: User.$name,
+  description: User.$description,
   definition(t) {
-    t.field(all_auth_recipe_users.user_id);
-    t.field(all_auth_recipe_users.recipe_id);
-    t.field(all_auth_recipe_users.Post);
+    t.field(User.id);
+    t.field(User.email);
+    t.field(User.post);
+    t.field(User.authId);
   },
 });
 export const PostType = objectType({

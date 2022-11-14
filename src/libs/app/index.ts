@@ -2,8 +2,7 @@ import express from "express";
 import cors from "cors";
 import "./supertokens";
 import { middleware as supertokensMiddleware } from "supertokens-node/framework/express";
-import { verifySession } from "supertokens-node/recipe/session/framework/express";
-// import { getAllCORSHeaders } from "supertokens-node";
+import SuperTokens from "supertokens-node";
 
 export async function getApp() {
   const app = express();
@@ -13,14 +12,21 @@ export async function getApp() {
     cors({
       origin: [
         "https://studio.apollographql.com",
+        /mystack\.io$/,
         /localhost/,
         "http://localhost:3001",
       ],
-      // allowedHeaders: ["content-type", ...getAllCORSHeaders()],
+      allowedHeaders: [
+        "content-type",
+        "apollographql-client-version",
+        "apollographql-client-name",
+        "apollo-require-preflight",
+        ...SuperTokens.getAllCORSHeaders(),
+      ],
       credentials: true,
+      exposedHeaders: "Content-Range",
     }),
   );
   app.use(supertokensMiddleware());
-  // app.use("/", verifySession({ sessionRequired: false }));
   return app;
 }

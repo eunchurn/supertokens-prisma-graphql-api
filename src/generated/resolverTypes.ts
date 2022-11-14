@@ -32,9 +32,10 @@ export interface NexusGenObjects {
     id: number; // Int!
   }
   Query: {};
-  all_auth_recipe_users: { // root type
-    recipe_id: string; // String!
-    user_id: string; // ID!
+  User: { // root type
+    authId?: string | null; // String
+    email: string; // String!
+    id: number; // Int!
   }
 }
 
@@ -53,13 +54,14 @@ export interface NexusGenFieldTypes {
     id: number; // Int!
   }
   Query: { // field return type
-    getMe: NexusGenRootTypes['all_auth_recipe_users'] | null; // all_auth_recipe_users
+    getMe: NexusGenRootTypes['User'] | null; // User
     ping: string | null; // String
   }
-  all_auth_recipe_users: { // field return type
-    Post: NexusGenRootTypes['Post'][]; // [Post!]!
-    recipe_id: string; // String!
-    user_id: string; // ID!
+  User: { // field return type
+    authId: string | null; // String
+    email: string; // String!
+    id: number; // Int!
+    post: NexusGenRootTypes['Post'][]; // [Post!]!
   }
 }
 
@@ -68,13 +70,14 @@ export interface NexusGenFieldTypeNames {
     id: 'Int'
   }
   Query: { // field return type name
-    getMe: 'all_auth_recipe_users'
+    getMe: 'User'
     ping: 'String'
   }
-  all_auth_recipe_users: { // field return type name
-    Post: 'Post'
-    recipe_id: 'String'
-    user_id: 'ID'
+  User: { // field return type name
+    authId: 'String'
+    email: 'String'
+    id: 'Int'
+    post: 'Post'
   }
 }
 

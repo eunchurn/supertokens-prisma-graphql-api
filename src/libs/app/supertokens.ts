@@ -1,9 +1,14 @@
 import supertokens from "supertokens-node";
 import jwt from "supertokens-node/recipe/jwt";
 import Session from "supertokens-node/recipe/session";
-import EmailPassword from "supertokens-node/recipe/emailpassword";
+import ThirdPartyEmailPassword, {
+  Google,
+  Apple,
+} from "supertokens-node/recipe/thirdpartyemailpassword";
 import UserRoles from "supertokens-node/recipe/userroles";
 import Dashboard from "supertokens-node/recipe/dashboard";
+import { prisma } from "../prisma";
+import { AccessType } from "@prisma/client";
 
 supertokens.init({
   framework: "express",
@@ -20,26 +25,74 @@ supertokens.init({
   },
   recipeList: [
     jwt.init(),
-    EmailPassword.init({
+    ThirdPartyEmailPassword.init({
+      providers: [
+        Google({
+          clientId:
+            "1060725074195-kmeum4crr01uirfl2op9kd5acmi9jutn.apps.googleusercontent.com",
+          clientSecret: "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",
+        }),
+        Apple({
+          clientId: "4398792-io.supertokens.example.service",
+          clientSecret: {
+            keyId: "7M48Y4RYDL",
+            privateKey:
+              "-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgu8gXs+XYkqXD6Ala9Sf/iJXzhbwcoG5dMh1OonpdJUmgCgYIKoZIzj0DAQehRANCAASfrvlFbFCYqn3I2zeknYXLwtH30JuOKestDbSfZYxZNMqhF/OzdZFTV0zc5u5s3eN+oCWbnvl0hM+9IW0UlkdA\n-----END PRIVATE KEY-----",
+            teamId: "YWQCXGJRJL",
+          },
+        }),
+      ],
       override: {
         functions: (originalImplementation) => {
           return {
             ...originalImplementation,
-
-            // here we are only overriding the function that's responsible
-            // for signing in a user.
-            signIn: async function (input) {
-              console.log("supertokens: signin");
-              console.log(input);
-              console.log(input.userContext._default);
-              return await originalImplementation.signIn(input);
+            async emailPasswordSignIn(input) {
+              const signinUser =
+                await originalImplementation.emailPasswordSignIn(input);
+              const { status } = signinUser;
+              if (status === "OK") {
+                const {
+                  user: { email, id },
+                } = signinUser;
+                await prisma.accessLog.create({
+                  data: {
+                    user: { connect: { authId: id } },
+                    email,
+                    accessType: AccessType.SIGNIN,
+                  },
+                });
+              }
+              return signinUser;
             },
-            signUp: async function (input) {
-              console.log("supertokens: signup");
-              // TODO: some custom logic
+            async emailPasswordSignUp(input) {
+              const signupUser =
+                await originalImplementation.emailPasswordSignUp(input);
+              const { status } = signupUser;
+              if (status === "OK") {
+                const {
+                  user: { email, id },
+                } = signupUser;
+                await prisma.user.create({ data: { email, authId: id } });
+                await prisma.accessLog.create({
+                  data: {
+                    user: { connect: { authId: id } },
+                    email,
+                    accessType: AccessType.SIGNUP,
+                  },
+                });
+              }
 
+              return signupUser;
+            },
+            thirdPartySignInUp: async function (input) {
+              // TODO: some custom logic
+              console.log(input);
               // or call the default behaviour as show below
-              return await originalImplementation.signUp(input);
+              const authUsers = await originalImplementation.thirdPartySignInUp(
+                input,
+              );
+              console.log({ authUsers });
+              return authUsers;
             },
             // ...
             // TODO: override more functions

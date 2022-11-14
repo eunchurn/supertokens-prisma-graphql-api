@@ -8,13 +8,13 @@ type Post {
 }
 
 type Query {
-  getMe: all_auth_recipe_users
+  getMe: User
   ping: String
 }
 
-"""Supertokens User"""
-type all_auth_recipe_users {
-  Post: [Post!]!
-  recipe_id: String!
-  user_id: ID!
+type User {
+  authId: String
+  email: String!
+  id: Int!
+  post: [Post!]!
 }
